@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Data Pengunjung</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg0: #020812;
+  --bg1: #060e22;
+  --bg2: #0a1832;
+  --bg3: #0f2244;
+  --card: #0d1f45;
+  --blue: #00c8ff;
+  --blue2: #0088ff;
+  --cyan: #00ffea;
+  --muted: #8ab4d4;
+  --border: rgba(0,200,255,0.18);
+  --border2: rgba(0,100,200,0.12);
+  --danger: #ff4f4f;
+  --danger-bg: rgba(255,79,79,0.08);
+  --success: #00e676;
+  --warn: #ffb300;
+  --text: #e8f4ff;
+}
+
+body {
+  font-family: 'Rajdhani', sans-serif;
+  background: var(--bg0);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* Grid bg */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(0,136,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,136,255,0.035) 1px, transparent 1px);
+  background-size:44px 44px;
+  pointer-events:none; z-index:0;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position:fixed; top:0; left:0;
+  width:220px; height:100vh;
+  background: linear-gradient(180deg, #071530 0%, #040d20 100%);
+  border-right: 1px solid var(--border2);
+  z-index:100;
+  display:flex; flex-direction:column;
+}
+
+.sidebar-logo {
+  padding:28px 20px 22px;
+  border-bottom:1px solid var(--border2);
+}
+
+.logo-badge {
+  font-family:'Orbitron', sans-serif;
+  font-size:10px; font-weight:700;
+  letter-spacing:2px;
+  color:var(--blue);
+  background:rgba(0,200,255,0.08);
+  border:1px solid rgba(0,200,255,0.2);
+  padding:4px 10px; border-radius:4px;
+  display:inline-block; margin-bottom:10px;
+}
+
+.logo-title {
+  font-family:'Orbitron', sans-serif;
+  font-size:15px; font-weight:700;
+  color:var(--text); letter-spacing:1px;
+  line-height:1.3;
+}
+
+.logo-sub {
+  font-size:12px; color:var(--muted);
+  margin-top:4px; letter-spacing:0.5px;
+}
+
+.nav {
+  flex:1; padding:16px 12px;
+  display:flex; flex-direction:column; gap:4px;
+}
+
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:8px;
+  cursor:pointer; font-size:14px; font-weight:600;
+  color:var(--muted); letter-spacing:0.5px;
+  transition:all 0.2s; border:1px solid transparent;
+  user-select:none;
+}
+
+.nav-item:hover { color:var(--text); background:rgba(0,200,255,0.06); }
+.nav-item.active {
+  color:var(--blue); background:rgba(0,200,255,0.1);
+  border-color:rgba(0,200,255,0.2);
+}
+
+.nav-icon { width:18px; text-align:center; font-size:13px; flex-shrink:0; }
+
+.sidebar-footer {
+  padding:16px 20px;
+  border-top:1px solid var(--border2);
+  font-size:12px; color:rgba(138,180,212,0.4);
+  letter-spacing:0.3px;
+}
+
+/* ── MAIN ── */
+.main {
+  margin-left:220px;
+  min-height:100vh;
+  position:relative; z-index:1;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  display:flex; align-items:center;
+  padding:18px 32px;
+  border-bottom:1px solid var(--border2);
+  background:rgba(2,8,18,0.8);
+  backdrop-filter:blur(12px);
+  position:sticky; top:0; z-index:50;
+  gap:16px;
+}
+
+.page-title {
+  font-family:'Orbitron', sans-serif;
+  font-size:16px; font-weight:700;
+  letter-spacing:1px; color:var(--text);
+}
+
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+
+.status-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:var(--success);
+  box-shadow:0 0 8px var(--success);
+  animation:blink2 2.5s ease-in-out infinite;
+}
+@keyframes blink2 { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.status-label { font-size:13px; color:var(--muted); letter-spacing:0.5px; }
+
+.btn {
+  font-family:'Rajdhani', sans-serif;
+  font-size:13px; font-weight:700;
+  letter-spacing:1px; padding:8px 18px;
+  border-radius:7px; cursor:pointer;
+  border:1px solid; transition:all 0.2s;
+  text-transform:uppercase;
+}
+
+.btn-primary {
+  background:linear-gradient(135deg,#0055cc,#0099ff);
+  border-color:rgba(0,150,255,0.4); color:#fff;
+}
+.btn-primary:hover { box-shadow:0 0 20px rgba(0,150,255,0.35); transform:translateY(-1px); }
+
+.btn-ghost {
+  background:transparent;
+  border-color:var(--border); color:var(--muted);
+}
+.btn-ghost:hover { border-color:var(--blue); color:var(--blue); background:rgba(0,200,255,0.06); }
+
+.btn-danger {
+  background:var(--danger-bg);
+  border-color:rgba(255,79,79,0.3); color:var(--danger);
+}
+.btn-danger:hover { background:rgba(255,79,79,0.15); box-shadow:0 0 16px rgba(255,79,79,0.2); }
+
+/* ── CONTENT ── */
+.content { padding:28px 32px; }
+
+/* ── STAT CARDS ── */
+.stats-row {
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:16px; margin-bottom:24px;
+}
+
+.stat-card {
+  background:linear-gradient(135deg, rgba(13,31,69,0.9) 0%, rgba(6,14,34,0.9) 100%);
+  border:1px solid var(--border2);
+  border-radius:12px; padding:20px 22px;
+  position:relative; overflow:hidden;
+}
+
+.stat-card::before {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:2px;
+}
+.stat-card:nth-child(1)::before { background:linear-gradient(90deg,transparent,var(--blue),transparent); }
+.stat-card:nth-child(2)::before { background:linear-gradient(90deg,transparent,var(--cyan),transparent); }
+.stat-card:nth-child(3)::before { background:linear-gradient(90deg,transparent,var(--warn),transparent); }
+.stat-card:nth-child(4)::before { background:linear-gradient(90deg,transparent,var(--success),transparent); }
+
+.stat-label {
+  font-size:11px; font-weight:600;
+  letter-spacing:2px; text-transform:uppercase;
+  color:var(--muted); margin-bottom:10px;
+}
+
+.stat-num {
+  font-family:'Orbitron', sans-serif;
+  font-size:28px; font-weight:700;
+  color:var(--text); line-height:1;
+}
+
+.stat-sub {
+  font-size:12px; color:rgba(138,180,212,0.5);
+  margin-top:6px;
+}
+
+.stat-icon {
+  position:absolute; right:18px; top:18px;
+  font-size:22px; opacity:0.15;
+}
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:16px; flex-wrap:wrap;
+}
+
+.search-wrap {
+  position:relative; flex:1; min-width:220px;
+}
+
+.search-icon {
+  position:absolute; left:12px; top:50%;
+  transform:translateY(-50%);
+  color:var(--muted); font-size:14px;
+  pointer-events:none;
+}
+
+.search-input {
+  width:100%;
+  background:rgba(0,30,70,0.5);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:9px 14px 9px 36px;
+  font-family:'Rajdhani', sans-serif;
+  font-size:15px; font-weight:500;
+  color:var(--text); outline:none;
+  transition:all 0.25s;
+}
+.search-input::placeholder { color:rgba(138,180,212,0.35); font-weight:400; }
+.search-input:focus {
+  border-color:var(--blue);
+  background:rgba(0,50,120,0.3);
+  box-shadow:0 0 0 3px rgba(0,200,255,0.07);
+}
+
+.filter-select {
+  background:rgba(0,30,70,0.5);
+  border:1px solid var(--border2);
+  border-radius:8px; padding:9px 14px;
+  font-family:'Rajdhani', sans-serif;
+  font-size:14px; font-weight:500;
+  color:var(--muted); outline:none;
+  cursor:pointer; transition:all 0.2s;
+}
+.filter-select:focus { border-color:var(--blue); color:var(--text); }
+
+/* ── TABLE ── */
+.table-wrap {
+  background:linear-gradient(135deg, rgba(13,31,69,0.9) 0%, rgba(6,14,34,0.9) 100%);
+  border:1px solid var(--border);
+  border-radius:14px; overflow:hidden;
+  position:relative;
+}
+
+.table-wrap::before {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--blue),var(--cyan),var(--blue),transparent);
+  animation:topline 4s ease-in-out infinite;
+}
+@keyframes topline { 0%,100%{opacity:0.5} 50%{opacity:1} }
+
+table { width:100%; border-collapse:collapse; }
+
+thead tr {
+  background:rgba(0,200,255,0.05);
+  border-bottom:1px solid var(--border);
+}
+
+th {
+  padding:13px 16px;
+  font-family:'Orbitron', sans-serif;
+  font-size:10px; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase;
+  color:var(--blue); text-align:left;
+  white-space:nowrap;
+}
+
+th.sortable { cursor:pointer; user-select:none; }
+th.sortable:hover { color:var(--cyan); }
+
+tbody tr {
+  border-bottom:1px solid rgba(0,100,200,0.1);
+  transition:background 0.15s;
+}
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:rgba(0,200,255,0.04); }
+
+td {
+  padding:13px 16px;
+  font-size:14px; font-weight:500;
+  color:var(--text); vertical-align:middle;
+}
+
+.td-no {
+  font-family:'Orbitron', sans-serif;
+  font-size:11px; color:rgba(138,180,212,0.4);
+  width:48px;
+}
+
+.td-nama { font-weight:600; }
+
+.td-waktu {
+  font-size:12px; color:var(--muted);
+  font-family:'Orbitron', sans-serif;
+  letter-spacing:0.3px; white-space:nowrap;
+}
+
+.minat-badge {
+  display:inline-block;
+  font-size:12px; font-weight:600;
+  padding:3px 10px; border-radius:20px;
+  background:rgba(0,255,234,0.08);
+  border:1px solid rgba(0,255,234,0.2);
+  color:var(--cyan);
+  max-width:200px; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap;
+}
+
+.empty-badge {
+  font-size:12px; color:rgba(138,180,212,0.3);
+  font-style:italic;
+}
+
+/* row actions */
+.row-actions {
+  display:flex; gap:6px; justify-content:flex-end;
+}
+
+.btn-icon {
+  width:32px; height:32px; border-radius:6px;
+  border:1px solid; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; transition:all 0.2s; background:transparent;
+}
+
+.btn-icon-del {
+  border-color:rgba(255,79,79,0.25); color:rgba(255,79,79,0.5);
+}
+.btn-icon-del:hover {
+  border-color:var(--danger); color:var(--danger);
+  background:var(--danger-bg);
+  box-shadow:0 0 10px rgba(255,79,79,0.2);
+}
+
+.btn-icon-view {
+  border-color:var(--border); color:var(--muted);
+}
+.btn-icon-view:hover {
+  border-color:var(--blue); color:var(--blue);
+  background:rgba(0,200,255,0.06);
+}
+
+/* ── EMPTY / LOADING ── */
+.table-empty {
+  text-align:center; padding:56px 24px;
+  color:var(--muted);
+}
+
+.empty-icon { font-size:40px; opacity:0.2; margin-bottom:12px; }
+.empty-text { font-size:15px; letter-spacing:1px; opacity:0.5; }
+
+.spinner-wrap {
+  display:flex; align-items:center; justify-content:center;
+  gap:10px; padding:56px;
+  font-size:13px; color:var(--muted); letter-spacing:1px;
+}
+
+.spinner {
+  width:20px; height:20px;
+  border:2px solid rgba(0,200,255,0.15);
+  border-top-color:var(--blue);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* ── PAGINATION ── */
+.pagination {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px;
+  border-top:1px solid var(--border2);
+}
+
+.page-info { font-size:13px; color:var(--muted); letter-spacing:0.5px; }
+
+.page-btns { display:flex; gap:6px; }
+
+.page-btn {
+  width:32px; height:32px; border-radius:6px;
+  border:1px solid var(--border2); background:transparent;
+  color:var(--muted); font-size:13px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s; font-family:'Rajdhani', sans-serif;
+}
+.page-btn:hover { border-color:var(--blue); color:var(--blue); }
+.page-btn.active { border-color:var(--blue); color:var(--blue); background:rgba(0,200,255,0.1); }
+.page-btn:disabled { opacity:0.3; cursor:not-allowed; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position:fixed; inset:0;
+  background:rgba(2,8,18,0.85);
+  backdrop-filter:blur(6px);
+  z-index:999; display:none;
+  align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+
+.modal {
+  background:linear-gradient(135deg, #0d1f45 0%, #060e22 100%);
+  border:1px solid var(--border);
+  border-radius:16px; padding:32px 28px;
+  width:100%; max-width:420px;
+  position:relative; overflow:hidden;
+  animation:modalIn 0.25s ease;
+}
+@keyframes modalIn { from{opacity:0;transform:translateY(-16px) scale(0.97)} to{opacity:1;transform:none} }
+
+.modal::before {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--danger),transparent);
+}
+
+.modal-title {
+  font-family:'Orbitron', sans-serif;
+  font-size:14px; font-weight:700; letter-spacing:1px;
+  color:var(--danger); margin-bottom:10px;
+}
+
+.modal-body {
+  font-size:15px; color:var(--muted);
+  line-height:1.6; margin-bottom:24px;
+}
+
+.modal-name {
+  font-weight:700; color:var(--text);
+}
+
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+
+/* ── DETAIL MODAL ── */
+.detail-field {
+  margin-bottom:16px;
+}
+.detail-label {
+  font-size:11px; letter-spacing:2px; font-weight:600;
+  text-transform:uppercase; color:var(--muted);
+  margin-bottom:5px;
+}
+.detail-value {
+  font-size:16px; font-weight:600; color:var(--text);
+  background:rgba(0,30,70,0.4);
+  border:1px solid var(--border2);
+  border-radius:7px; padding:10px 14px;
+}
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:28px; right:28px;
+  padding:12px 20px; border-radius:10px;
+  font-size:14px; font-weight:600; letter-spacing:0.5px;
+  z-index:9999; display:none;
+  animation:toastIn 0.3s ease;
+  border:1px solid;
+}
+@keyframes toastIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+
+.toast.success {
+  display:block;
+  background:rgba(0,230,118,0.1); border-color:rgba(0,230,118,0.3); color:var(--success);
+}
+.toast.error {
+  display:block;
+  background:rgba(255,79,79,0.1); border-color:rgba(255,79,79,0.3); color:var(--danger);
+}
+
+/* ── CORNER DECO ── */
+.cdeco { position:absolute; width:16px; height:16px; border-color:rgba(0,200,255,0.25); border-style:solid; }
+.cdeco.tl { top:8px;left:8px;border-width:2px 0 0 2px; }
+.cdeco.br { bottom:8px;right:8px;border-width:0 2px 2px 0; }
+
+/* ── CONFIG WARN ── */
+.config-warn {
+  background:rgba(255,179,0,0.07);
+  border:1px solid rgba(255,179,0,0.2);
+  border-radius:10px; padding:12px 18px;
+  margin-bottom:20px;
+  font-size:13px; color:#ffb300; line-height:1.6;
+}
+.config-warn strong {
+  font-family:'Orbitron', sans-serif; font-size:10px;
+  letter-spacing:2px; display:block; margin-bottom:4px;
+}
+.config-warn code {
+  font-family:monospace; background:rgba(255,179,0,0.1);
+  padding:1px 6px; border-radius:3px; font-size:12px;
+}
+
+/* responsive */
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .content{padding:16px}
+  .topbar{padding:14px 16px}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">ADMIN</div>
+    <div class="logo-title">PANEL KONTROL</div>
+    <div class="logo-sub">Sistem Manajemen Data</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="setPage('dashboard')">
+      <span class="nav-icon">▦</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="setPage('data')">
+      <span class="nav-icon">◈</span> Data Pengunjung
+    </div>
+    <div class="nav-item" onclick="exportCSV()">
+      <span class="nav-icon">↓</span> Export CSV
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    Sistem Registrasi v1.0<br>
+    Firebase Firestore
+  </div>
+</aside>
+
+<div class="main">
+
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">DASHBOARD</div>
+    <div class="topbar-right">
+      <div class="status-dot"></div>
+      <div class="status-label">Realtime aktif</div>
+      <button class="btn btn-primary" onclick="exportCSV()">↓ Export CSV</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="config-warn" id="configWarn">
+      <strong>⚙ KONFIGURASI DIPERLUKAN</strong>
+      Isi <code>firebaseConfig</code> di bagian &lt;script&gt; dengan konfigurasi Firebase project Anda sebelum menggunakan panel ini.
+    </div>
+
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <div class="cdeco tl"></div>
+        <div class="stat-label">Total Pengunjung</div>
+        <div class="stat-num" id="statTotal">—</div>
+        <div class="stat-sub">seluruh waktu</div>
+        <div class="stat-icon">◎</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Dengan Minat Sekolah</div>
+        <div class="stat-num" id="statMinat">—</div>
+        <div class="stat-sub">mengisi kolom minat</div>
+        <div class="stat-icon">◉</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Hari Ini</div>
+        <div class="stat-num" id="statHariIni">—</div>
+        <div class="stat-sub" id="statDate">—</div>
+        <div class="stat-icon">◌</div>
+      </div>
+      <div class="stat-card">
+        <div class="cdeco br"></div>
+        <div class="stat-label">Sekolah Unik</div>
+        <div class="stat-num" id="statSekolah">—</div>
+        <div class="stat-sub">asal sekolah berbeda</div>
+        <div class="stat-icon">◫</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" class="search-input" id="searchInput"
+          placeholder="Cari nama, kelas, sekolah asal, atau minat..."
+          oninput="applyFilter()">
+      </div>
+      <select class="filter-select" id="filterMinat" onchange="applyFilter()">
+        <option value="all">Semua Data</option>
+        <option value="with">Ada Minat Sekolah</option>
+        <option value="without">Tanpa Minat Sekolah</option>
+      </select>
+      <button class="btn btn-danger" id="btnDelSelected" onclick="deleteSelected()" style="display:none">
+        ✕ Hapus Terpilih (<span id="selCount">0</span>)
+      </button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px">
+              <input type="checkbox" id="checkAll" onchange="toggleAll(this.checked)"
+                style="accent-color:var(--blue); cursor:pointer; width:14px; height:14px">
+            </th>
+            <th class="sortable" onclick="sortBy('no')">#</th>
+            <th class="sortable" onclick="sortBy('nama')">Nama ⇅</th>
+            <th class="sortable" onclick="sortBy('kelas')">Kelas ⇅</th>
+            <th class="sortable" onclick="sortBy('asalSekolah')">Asal Sekolah ⇅</th>
+            <th>Minat Sekolah</th>
+            <th class="sortable" onclick="sortBy('waktu')">Waktu Daftar ⇅</th>
+            <th style="text-align:right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr>
+            <td colspan="8">
+              <div class="spinner-wrap">
+                <div class="spinner"></div>
+                <span>Memuat data dari Firestore...</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination" id="pagination" style="display:none">
+        <div class="page-info" id="pageInfo"></div>
+        <div class="page-btns" id="pageBtns"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-title">⚠ KONFIRMASI HAPUS</div>
+    <div class="modal-body">
+      Anda yakin ingin menghapus data pengunjung
+      <span class="modal-name" id="deleteTargetName"></span>?
+      Tindakan ini tidak dapat dibatalkan.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Batal</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Ya, Hapus</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title" style="color:var(--blue)">◈ DETAIL PENGUNJUNG</div>
+    <div id="detailContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('detailModal')">Tutup</button>
+      <button class="btn btn-danger" id="detailDelBtn">✕ Hapus Data</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+
+  // ============================================================
+  //   GANTI DENGAN KONFIGURASI FIREBASE PROJECT ANDA
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNeUeZaVwm1CyREksD1hoOsTLM4sFtdvU",
+    authDomain: "daftar-pengunjung-cc8d0.firebaseapp.com",
+    projectId: "daftar-pengunjung-cc8d0",
+    storageBucket: "daftar-pengunjung-cc8d0.firebasestorage.app",
+    messagingSenderId: "839118866086",
+    appId: "1:839118866086:web:0b97f96c07f4fd08319667",
+    measurementId: "G-EBS6EP1BCR"
+  };
+  // ============================================================
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+  const col = collection(db, "pengunjung");
+
+  let allData      = [];
+  let filtered     = [];
+  let currentPage  = 1;
+  const PER_PAGE   = 15;
+  let sortField    = 'waktu';
+  let sortDir      = 'desc';
+  let deleteTarget = null;
+  let selected     = new Set();
+
+  // ── REALTIME LISTENER ──────────────────────────────────────
+  const q = query(col, orderBy("waktu", "desc"));
+  onSnapshot(q, snap => {
+    allData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    updateStats();
+    applyFilter();
+  }, err => {
+    document.getElementById('tableBody').innerHTML = `
+      <tr><td colspan="8">
+        <div class="table-empty">
+          <div class="empty-icon">⚠</div>
+          <div class="empty-text" style="color:var(--danger)">Gagal memuat: ${err.message}</div>
+        </div>
+      </td></tr>`;
+  });
+
+  // ── STATS ──────────────────────────────────────────────────
+  function updateStats() {
+    const today = new Date().toDateString();
+    const hariIni = allData.filter(d => d.waktu?.toDate()?.toDateString() === today).length;
+    const minat   = allData.filter(d => d.minatSekolah).length;
+    const sekolah = new Set(allData.map(d => d.asalSekolah?.trim().toLowerCase())).size;
+
+    document.getElementById('statTotal').textContent   = allData.length;
+    document.getElementById('statMinat').textContent   = minat;
+    document.getElementById('statHariIni').textContent = hariIni;
+    document.getElementById('statSekolah').textContent = sekolah;
+    document.getElementById('statDate').textContent    =
+      new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long' });
+  }
+
+  // ── FILTER & SORT ──────────────────────────────────────────
+  window.applyFilter = function() {
+    const q   = document.getElementById('searchInput').value.trim().toLowerCase();
+    const f   = document.getElementById('filterMinat').value;
+    currentPage = 1;
+
+    filtered = allData.filter(d => {
+      const matchQ = !q ||
+        (d.nama?.toLowerCase().includes(q)) ||
+        (d.kelas?.toLowerCase().includes(q)) ||
+        (d.asalSekolah?.toLowerCase().includes(q)) ||
+        (d.minatSekolah?.toLowerCase().includes(q));
+      const matchF = f === 'all'
+        ? true : f === 'with' ? !!d.minatSekolah : !d.minatSekolah;
+      return matchQ && matchF;
+    });
+
+    sortData();
+    renderTable();
+  };
+
+  window.sortBy = function(field) {
+    if (sortField === field) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortField = field; sortDir = 'asc'; }
+    sortData();
+    renderTable();
+  };
+
+  function sortData() {
+    filtered.sort((a,b) => {
+      let va = sortField === 'waktu' ? (a.waktu?.toDate()?.getTime() || 0)
+             : (a[sortField] || '').toString().toLowerCase();
+      let vb = sortField === 'waktu' ? (b.waktu?.toDate()?.getTime() || 0)
+             : (b[sortField] || '').toString().toLowerCase();
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  // ── RENDER TABLE ───────────────────────────────────────────
+  function renderTable() {
+    const body = document.getElementById('tableBody');
+    const total = filtered.length;
+    const pages = Math.ceil(total / PER_PAGE);
+    if (currentPage > pages && pages > 0) currentPage = pages;
+
+    const start = (currentPage - 1) * PER_PAGE;
+    const slice = filtered.slice(start, start + PER_PAGE);
+
+    if (total === 0) {
+      body.innerHTML = `<tr><td colspan="8">
+        <div class="table-empty">
+          <div class="empty-icon">◎</div>
+          <div class="empty-text">Tidak ada data ditemukan</div>
+        </div></td></tr>`;
+      renderPagination(0, 0, 0);
+      return;
+    }
+
+    body.innerHTML = slice.map((d, i) => {
+      const no  = start + i + 1;
+      const waktu = d.waktu?.toDate();
+      const tgl = waktu ? waktu.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+      const jam = waktu ? waktu.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' }) : '';
+      const chk = selected.has(d.id) ? 'checked' : '';
+      return `
+      <tr id="row-${d.id}">
+        <td>
+          <input type="checkbox" ${chk} onchange="toggleRow('${d.id}',this.checked)"
+            style="accent-color:var(--blue);cursor:pointer;width:14px;height:14px">
+        </td>
+        <td class="td-no">${no}</td>
+        <td class="td-nama">${esc(d.nama)}</td>
+        <td>${esc(d.kelas || '-')}</td>
+        <td>${esc(d.asalSekolah)}</td>
+        <td>${d.minatSekolah
+          ? `<span class="minat-badge" title="${esc(d.minatSekolah)}">${esc(d.minatSekolah)}</span>`
+          : `<span class="empty-badge">—</span>`}</td>
+        <td class="td-waktu">${tgl}<br><span style="opacity:0.5">${jam}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="btn-icon btn-icon-view" title="Lihat Detail" onclick="openDetail('${d.id}')">◈</button>
+            <button class="btn-icon btn-icon-del" title="Hapus" onclick="openDelete('${d.id}','${esc(d.nama)}')">✕</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    renderPagination(total, pages, start);
+    syncCheckAll();
+  }
+
+  function renderPagination(total, pages, start) {
+    const pag  = document.getElementById('pagination');
+    const info = document.getElementById('pageInfo');
+    const btns = document.getElementById('pageBtns');
+
+    if (total === 0) { pag.style.display='none'; return; }
+    pag.style.display = 'flex';
+
+    const end = Math.min(start + PER_PAGE, total);
+    info.textContent = `Menampilkan ${start+1}–${end} dari ${total} data`;
+
+    let html = `<button class="page-btn" ${currentPage===1?'disabled':''} onclick="goPage(${currentPage-1})">‹</button>`;
+    for (let p=1; p<=pages; p++) {
+      if (pages > 7 && Math.abs(p-currentPage)>2 && p!==1 && p!==pages) {
+        if (p===2||p===pages-1) { html+=`<button class="page-btn" disabled>…</button>`; }
+        continue;
+      }
+      html += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+    }
+    html += `<button class="page-btn" ${currentPage===pages?'disabled':''} onclick="goPage(${currentPage+1})">›</button>`;
+    btns.innerHTML = html;
+  }
+
+  window.goPage = function(p) {
+    currentPage = p;
+    renderTable();
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  // ── CHECKBOX ───────────────────────────────────────────────
+  window.toggleRow = function(id, checked) {
+    checked ? selected.add(id) : selected.delete(id);
+    syncCheckAll();
+    syncDelBtn();
+  };
+
+  window.toggleAll = function(checked) {
+    const start = (currentPage-1)*PER_PAGE;
+    const slice = filtered.slice(start, start+PER_PAGE);
+    slice.forEach(d => checked ? selected.add(d.id) : selected.delete(d.id));
+    renderTable();
+    syncDelBtn();
+  };
+
+  function syncCheckAll() {
+    const start = (currentPage-1)*PER_PAGE;
+    const slice = filtered.slice(start, start+PER_PAGE);
+    const allCk = slice.length > 0 && slice.every(d => selected.has(d.id));
+    document.getElementById('checkAll').checked = allCk;
+  }
+
+  function syncDelBtn() {
+    const btn = document.getElementById('btnDelSelected');
+    const cnt = document.getElementById('selCount');
+    if (selected.size > 0) {
+      btn.style.display=''; cnt.textContent=selected.size;
+    } else {
+      btn.style.display='none';
+    }
+  }
+
+  // ── DELETE SINGLE ──────────────────────────────────────────
+  window.openDelete = function(id, nama) {
+    deleteTarget = id;
+    document.getElementById('deleteTargetName').textContent = nama;
+    document.getElementById('deleteModal').classList.add('open');
+  };
+
+  window.confirmDelete = async function() {
+    if (!deleteTarget) return;
+    try {
+      await deleteDoc(doc(db, 'pengunjung', deleteTarget));
+      selected.delete(deleteTarget);
+      syncDelBtn();
+      showToast('Data berhasil dihapus', 'success');
+    } catch(e) {
+      showToast('Gagal menghapus: ' + e.message, 'error');
+    }
+    closeModal('deleteModal');
+    deleteTarget = null;
+  };
+
+  // ── DELETE SELECTED ────────────────────────────────────────
+  window.deleteSelected = async function() {
+    if (!selected.size) return;
+    if (!confirm(`Hapus ${selected.size} data yang dipilih? Tindakan ini tidak dapat dibatalkan.`)) return;
+    let ok=0, fail=0;
+    for (const id of [...selected]) {
+      try {
+        await deleteDoc(doc(db, 'pengunjung', id));
+        ok++;
+      } catch { fail++; }
+    }
+    selected.clear();
+    syncDelBtn();
+    showToast(`${ok} data dihapus${fail?`, ${fail} gagal`:''}`, ok>0?'success':'error');
+  };
+
+  // ── DETAIL ─────────────────────────────────────────────────
+  window.openDetail = function(id) {
+    const d = allData.find(x => x.id === id);
+    if (!d) return;
+    const waktu = d.waktu?.toDate();
+    const tgl = waktu ? waktu.toLocaleString('id-ID',
+      {weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+
+    document.getElementById('detailContent').innerHTML = `
+      <div class="detail-field">
+        <div class="detail-label">ID Dokumen</div>
+        <div class="detail-value" style="font-size:12px;font-family:monospace;color:var(--muted)">${id}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Nama Lengkap</div>
+        <div class="detail-value">${esc(d.nama)}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Kelas</div>
+        <div class="detail-value">${esc(d.kelas || '-')}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Asal Sekolah</div>
+        <div class="detail-value">${esc(d.asalSekolah)}</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Minat Sekolah</div>
+        <div class="detail-value" style="${!d.minatSekolah?'color:var(--muted);font-style:italic':''}">
+          ${d.minatSekolah ? esc(d.minatSekolah) : 'Tidak diisi'}
+        </div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-label">Waktu Registrasi</div>
+        <div class="detail-value" style="font-size:13px">${tgl}</div>
+      </div>
+    `;
+    document.getElementById('detailDelBtn').onclick = () => {
+      closeModal('detailModal');
+      openDelete(id, d.nama);
+    };
+    document.getElementById('detailModal').classList.add('open');
+  };
+
+  // ── EXPORT CSV ─────────────────────────────────────────────
+  window.exportCSV = function() {
+    if (!allData.length) { showToast('Belum ada data untuk diekspor', 'error'); return; }
+    const rows = [['No','Nama','Kelas','Asal Sekolah','Minat Sekolah','Waktu Daftar']];
+    allData.forEach((d,i) => {
+      const waktu = d.waktu?.toDate();
+      rows.push([
+        i+1,
+        `"${(d.nama||'').replace(/"/g,'""')}"`,
+        `"${(d.kelas||'').replace(/"/g,'""')}"`,
+        `"${(d.asalSekolah||'').replace(/"/g,'""')}"`,
+        `"${(d.minatSekolah||'').replace(/"/g,'""')}"`,
+        waktu ? waktu.toLocaleString('id-ID') : ''
+      ]);
+    });
+    const csv  = '\uFEFF' + rows.map(r=>r.join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), {href:url,download:`pengunjung_${Date.now()}.csv`});
+    a.click(); URL.revokeObjectURL(url);
+    showToast(`${allData.length} data berhasil diekspor`, 'success');
+  };
+
+  // ── MODAL & NAV ────────────────────────────────────────────
+  window.closeModal = function(id) {
+    document.getElementById(id).classList.remove('open');
+  };
+
+  window.setPage = function(p) {
+    document.getElementById('pageTitle').textContent = p.toUpperCase();
+    document.querySelectorAll('.nav-item').forEach((el,i) => {
+      el.classList.toggle('active', i === (p==='dashboard'?0:1));
+    });
+  };
+
+  // ── TOAST ──────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = (type==='success'?'✓ ':'✕ ') + msg;
+    t.className   = `toast ${type}`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.style.display='none'; t.className='toast'; }, 3500);
+  }
+
+  // ── CLOSE MODAL ON OVERLAY CLICK ───────────────────────────
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); });
+  });
+
+  // ── ESC KEY ────────────────────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open')
+      .forEach(m => m.classList.remove('open'));
+  });
+
+  function esc(s) {
+    return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
