@@ -557,7 +557,7 @@ td {
   </nav>
   <div class="sidebar-footer">
     Sistem Registrasi v1.0<br>
-    Firebase Firestore
+    Rekayasa Perangkat Lunak
   </div>
 </aside>
 
@@ -574,10 +574,10 @@ td {
 
   <div class="content">
 
-    <div class="config-warn" id="configWarn">
+    <!-- <div class="config-warn" id="configWarn">
       <strong>⚙ KONFIGURASI DIPERLUKAN</strong>
       Isi <code>firebaseConfig</code> di bagian &lt;script&gt; dengan konfigurasi Firebase project Anda sebelum menggunakan panel ini.
-    </div>
+    </div> -->
 
     <div class="stats-row" id="statsRow">
       <div class="stat-card">
@@ -692,7 +692,7 @@ td {
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp }
+  import { getFirestore, collection, addDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
 
